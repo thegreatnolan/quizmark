@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Quizmark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one centered column (54rem). Library, editor and study screens swap in place inside #view.
+   Highlighter yellow is the only accent; ink navy carries primary actions. */
+:root {
+  --bg: #F2F4F8; --surface: #FFFFFF; --surface-2: #E6EAF2;
+  --ink: #151B30; --ink-2: #48516D; --line: #D0D7E3;
+  --mark: #FFD93D; --mark-ink: #151B30;
+  --btn-bg: #151B30; --btn-fg: #FFFFFF;
+  --good: #17693F; --good-bg: #DDF3E6;
+  --bad: #A8241C; --bad-bg: #FBE4E1;
+  --focus: #2F45E0;
+  --shadow: 0 1px 2px rgba(21,27,48,.06), 0 8px 20px rgba(21,27,48,.05);
+  --scrim: rgba(21,27,48,.55);
+  --f-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1120; --surface: #161C31; --surface-2: #202843;
+    --ink: #EEF1F9; --ink-2: #A6AFC9; --line: #2D3658;
+    --mark: #FFD93D; --mark-ink: #151B30;
+    --btn-bg: #FFD93D; --btn-fg: #151B30;
+    --good: #6EDBA0; --good-bg: #12331F;
+    --bad: #FF9A92; --bad-bg: #3A1B1D;
+    --focus: #9AA9FF;
+    --shadow: 0 1px 0 rgba(0,0,0,.35);
+    --scrim: rgba(3,5,12,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1120; --surface: #161C31; --surface-2: #202843;
+  --ink: #EEF1F9; --ink-2: #A6AFC9; --line: #2D3658;
+  --mark: #FFD93D; --mark-ink: #151B30;
+  --btn-bg: #FFD93D; --btn-fg: #151B30;
+  --good: #6EDBA0; --good-bg: #12331F;
+  --bad: #FF9A92; --bad-bg: #3A1B1D;
+  --focus: #9AA9FF;
+  --shadow: 0 1px 0 rgba(0,0,0,.35);
+  --scrim: rgba(3,5,12,.7);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
+.wrap { max-width: 54rem; margin-inline: auto; padding-inline: 16px; padding-block: 18px 72px; }
+h1, h2, h3, p { margin: 0; }
+h1, h2, .qtext, .brand, .score { font-family: var(--f-display); text-wrap: balance; }
+h1 { font-size: clamp(1.7rem, 4.5vw, 2.2rem); line-height: 1.15; font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: 1.2rem; line-height: 1.25; font-weight: 600; }
+.mono { font-family: var(--f-mono); font-size: .78rem; letter-spacing: .04em; text-transform: uppercase; }
+.dim { color: var(--ink-2); }
+.small { font-size: .88rem; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.hl { background: var(--mark); color: var(--mark-ink); padding: 0 .22em; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+/* header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 22px; }
+.brand { font-size: 1.5rem; font-weight: 700; letter-spacing: -.02em; }
+.top-actions { display: flex; gap: 8px; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 2.6rem; padding: .45rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 700 .95rem var(--f-body); cursor: pointer; text-align: center; }
+.btn:hover { border-color: var(--ink-2); }
+.btn.primary { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+.btn.danger { color: var(--bad); }
+.btn.small { min-height: 2.2rem; padding: .3rem .8rem; font-size: .88rem; }
+.btn.wide { width: 100%; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.icon { min-width: 2.4rem; min-height: 2.4rem; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 700 1rem var(--f-body); cursor: pointer; }
+.icon:hover { border-color: var(--ink-2); }
+.icon:disabled { opacity: .35; cursor: not-allowed; }
+.link { background: none; border: 0; padding: .4rem 0; color: var(--ink); font: 700 .95rem var(--f-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* forms */
+label, legend { display: block; font: 500 .78rem var(--f-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); margin-bottom: 6px; padding: 0; }
+input[type="text"], textarea, select { width: 100%; padding: .6rem .75rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 400 1rem/1.4 var(--f-body); }
+textarea { resize: vertical; min-height: 3rem; }
+select { width: auto; max-width: 100%; min-height: 2.4rem; padding-block: .35rem; }
+input[type="radio"], input[type="checkbox"] { width: 1.15rem; height: 1.15rem; accent-color: var(--focus); margin: 0; flex: none; }
+.chk { display: inline-flex; gap: 8px; align-items: center; text-transform: none; letter-spacing: 0; font: 400 .95rem var(--f-body); color: var(--ink); margin: 0; cursor: pointer; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+/* cards */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
+.page-head { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; justify-content: space-between; margin-bottom: 16px; }
+.page-head p { margin-top: 6px; }
+.toolbar { margin-bottom: 14px; }
+.qz-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.qz { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+.qz-info { flex: 1 1 14rem; min-width: 0; display: grid; gap: 4px; }
+.qz-info h2 { overflow-wrap: anywhere; }
+.qz-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.empty { display: grid; gap: 14px; justify-items: start; }
+.peek { width: 100%; display: grid; gap: 8px; padding: 14px; border: 1px dashed var(--line); border-radius: 10px; background: var(--bg); }
+.peek .qtext { font-size: 1.05rem; font-weight: 600; }
+.pk { display: flex; gap: 10px; align-items: center; padding: .5rem .7rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: .95rem; }
+.pk.on { background: var(--good-bg); border-color: var(--good); color: var(--good); font-weight: 700; }
+.letter { display: inline-grid; place-items: center; flex: none; width: 1.7rem; height: 1.7rem; border-radius: 6px; background: var(--surface-2); color: var(--ink); font: 500 .8rem var(--f-mono); }
+
+/* editor */
+.ed-top, .play-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; }
+.title-input { font: 700 clamp(1.4rem, 4vw, 1.9rem)/1.2 var(--f-display); padding: .55rem .75rem; margin-bottom: 18px; }
+#qlist { display: grid; gap: 14px; }
+.qcard { display: grid; gap: 12px; }
+.qhead { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.qhead .spacer { flex: 1 1 0; }
+.tag { display: inline-block; padding: .1rem .5rem; border-radius: 99px; font: 500 .72rem var(--f-mono); letter-spacing: .04em; text-transform: uppercase; }
+.tag.warn { background: var(--bad-bg); color: var(--bad); }
+.opts-edit { display: grid; gap: 8px; }
+.opt { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.tfrow { display: flex; gap: 20px; }
+.add-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.bulk { margin-top: 14px; display: grid; gap: 10px; }
+.zone { margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--line); }
+.none { padding: 22px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+
+/* study */
+.bar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; margin-bottom: 16px; }
+.bar span { display: block; height: 100%; background: var(--mark); border-radius: 99px; }
+@media (prefers-reduced-motion: no-preference) { .bar span { transition: width .25s ease; } }
+.stage { display: grid; gap: 16px; padding: clamp(18px, 4vw, 28px); }
+.qtext { font-size: clamp(1.3rem, 3.6vw, 1.7rem); line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+.opts { display: grid; gap: 10px; }
+.opt-btn { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 400 1.02rem/1.35 var(--f-body); text-align: left; cursor: pointer; }
+.opt-btn:hover:not(:disabled) { border-color: var(--ink-2); background: var(--surface-2); }
+.opt-btn:disabled { cursor: default; color: var(--ink); }
+.opt-btn .otext { overflow-wrap: anywhere; }
+.opt-btn.correct { background: var(--good-bg); border-color: var(--good); }
+.opt-btn.correct .mono { color: var(--good); }
+.opt-btn.wrong { background: var(--bad-bg); border-color: var(--bad); }
+.opt-btn.wrong .mono { color: var(--bad); }
+.opt-btn.muted { opacity: .6; }
+.short { display: flex; flex-wrap: wrap; gap: 10px; }
+.short input { flex: 1 1 14rem; width: auto; min-width: 0; font-size: 1.05rem; }
+.short input.ok { border-color: var(--good); background: var(--good-bg); }
+.short input.no { border-color: var(--bad); background: var(--bad-bg); }
+.fb { display: grid; gap: 8px; padding: 14px 16px; border-radius: 10px; }
+.fb.good { background: var(--good-bg); color: var(--good); }
+.fb.bad { background: var(--bad-bg); color: var(--bad); }
+.fb p { color: var(--ink); }
+.fb strong { color: inherit; }
+.expl { color: var(--ink-2); }
+.hint { margin-top: 12px; text-align: center; display: none; }
+@media (hover: hover) and (pointer: fine) { .hint { display: block; } }
+
+.fcard { display: grid; gap: 12px; align-content: center; min-height: 15rem; padding: clamp(18px, 4vw, 30px); border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); cursor: pointer; }
+.fcard:hover { border-color: var(--ink-2); }
+.fcard.flipped { background: var(--surface-2); }
+.fcard .ans { font-family: var(--f-display); font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.plain li { display: flex; gap: 10px; align-items: center; }
+.fc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.fc-actions .btn:only-child { grid-column: 1 / -1; }
+
+/* results */
+.res { display: grid; gap: 14px; justify-items: start; margin-bottom: 22px; }
+.score { font-size: clamp(2.8rem, 12vw, 4.4rem); font-weight: 700; line-height: 1.1; }
+.review { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rv { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.rv p { overflow-wrap: anywhere; }
+.rv .tag.ok { background: var(--good-bg); color: var(--good); }
+.rv .tag.miss { background: var(--bad-bg); color: var(--bad); }
+.rv .tag { justify-self: start; }
+
+/* modal + toast + footer */
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px)); background: var(--scrim); }
+.sheet { width: 100%; max-width: 40rem; max-height: 100%; overflow: auto; display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sheet textarea { font: 400 .85rem/1.45 var(--f-mono); }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; display: flex; gap: 14px; align-items: center; max-width: calc(100vw - 32px); padding: .7rem 1rem; border-radius: 10px; background: var(--btn-bg); color: var(--btn-fg); box-shadow: 0 8px 24px rgba(0,0,0,.25); font-weight: 700; font-size: .95rem; }
+.toast-btn { background: none; border: 0; color: inherit; font: 700 .95rem var(--f-body); text-decoration: underline; cursor: pointer; padding: 0; }
+.foot { margin-top: 32px; text-align: center; }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">Quiz<span class="hl">mark</span></div>
+    <div class="top-actions">
+      <button class="btn small" data-act="open-import">Import</button>
+      <button class="btn small" data-act="open-export">Export</button>
+    </div>
+  </header>
+  <main id="view"></main>
+  <p class="foot mono dim" id="foot" role="status"></p>
+</div>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<div id="modal" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mtitle">
+    <div class="sheet-head"><h2 id="mtitle"></h2><button class="btn small" data-act="close-modal">Close</button></div>
+    <div id="mbody"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- helpers ---------- */
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var esc = function (s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  };
+  var rid = function () { return 'x' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3); };
+  var str = function (v) { return typeof v === 'string' ? v.slice(0, 2000) : (typeof v === 'number' ? String(v) : ''); };
+  var LETTERS = 'ABCDEF';
+  var LS = 'quizmark.v1';
+  var TYPE_LABEL = { choice: 'Multiple choice', tf: 'True or false', short: 'Short answer' };
+
+  /* ---------- state ---------- */
+  var quizzes = [];
+  var deleted = new Set();
+  var ui = { view: 'library', editId: null, session: null, shuffle: true, bulkOpen: false };
+  var store = { col: null, status: 'local', err: '' };
+  var dl = null;
+  var timers = new Map();
+  var chains = new Map();
+  var lastFocus = null;
+
+  try { var sh = localStorage.getItem('quizmark.shuffle'); if (sh !== null) ui.shuffle = sh === '1'; } catch (e) {}
+
+  /* ---------- model ---------- */
+  function newQuestion(type) {
+    return { id: rid(), type: type || 'choice', text: '', options: ['', '', '', ''], correct: 0, tf: true, answers: [], explain: '' };
+  }
+  function cleanQuestion(r, keep) {
+    if (!r || typeof r !== 'object') return null;
+    var type = ['choice', 'tf', 'short'].indexOf(r.type) >= 0 ? r.type : (Array.isArray(r.options) && r.options.length ? 'choice' : 'short');
+    var q = newQuestion(type);
+    if (keep && typeof r.id === 'string' && /^[A-Za-z0-9_-]{1,60}$/.test(r.id)) q.id = r.id;
+    q.text = str(r.text != null ? r.text : r.question);
+    if (Array.isArray(r.options)) {
+      q.options = r.options.slice(0, 6).map(str);
+      while (q.options.length < 2) q.options.push('');
+    }
+    q.correct = Number.isInteger(r.correct) && r.correct >= 0 && r.correct < q.options.length ? r.correct : 0;
+    q.tf = r.tf !== false;
+    if (Array.isArray(r.answers)) q.answers = r.answers.map(str).map(function (s) { return s.trim(); }).filter(Boolean);
+    else if (typeof r.answer === 'string' && r.answer.trim()) q.answers = [r.answer.trim().slice(0, 2000)];
+    q.explain = str(r.explain);
+    return q;
+  }
+  function cleanQuiz(r, keep) {
+    if (!r || typeof r !== 'object') return null;
+    var list = Array.isArray(r.questions) ? r.questions : (Array.isArray(r.cards) ? r.cards : []);
+    var now = Date.now();
+    var q = {
+      id: rid(),
+      title: str(r.title).slice(0, 120),
+      questions: list.slice(0, 500).map(function (x) { return cleanQuestion(x, keep); }).filter(Boolean),
+      createdAt: now, updatedAt: now, plays: 0, best: null, lastAt: null
+    };
+    if (keep) {
+      if (typeof r.id === 'string' && /^[A-Za-z0-9_-]{1,60}$/.test(r.id)) q.id = r.id;
+      if (Number.isFinite(r.createdAt)) q.createdAt = r.createdAt;
+      if (Number.isFinite(r.updatedAt)) q.updatedAt = r.updatedAt;
+      if (Number.isFinite(r.plays)) q.plays = r.plays;
+      if (r.best && Number.isFinite(r.best.correct) && Number.isFinite(r.best.total) && r.best.total > 0) q.best = { correct: r.best.correct, total: r.best.total };
+      if (Number.isFinite(r.lastAt)) q.lastAt = r.lastAt;
+      if (r.unsynced) q.unsynced = true;
+    }
+    return q;
+  }
+  function valid(q) {
+    if (!q.text.trim()) return false;
+    if (q.type === 'choice') {
+      var filled = q.options.filter(function (o) { return o.trim(); });
+      return filled.length >= 2 && !!(q.options[q.correct] || '').trim();
+    }
+    if (q.type === 'tf') return true;
+    return q.answers.some(function (a) { return a.trim(); });
+  }
+  function answerText(q) {
+    if (q.type === 'choice') return q.options[q.correct] || '';
+    if (q.type === 'tf') return q.tf ? 'True' : 'False';
+    return q.answers[0] || '';
+  }
+  function norm(s) {
+    return String(s).toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
+      .replace(/&/g, ' and ').replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\b(the|a|an)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function matches(q, input) {
+    var n = norm(input);
+    return !!n && q.answers.some(function (a) { return norm(a) === n; });
+  }
+  function shuffled(a) {
+    var r = a.slice();
+    for (var i = r.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = r[i]; r[i] = r[j]; r[j] = t; }
+    return r;
+  }
+  function newQuiz(title) {
+    var t = Date.now();
+    return { id: rid(), title: title || 'Untitled quiz', questions: [newQuestion()], createdAt: t, updatedAt: t, plays: 0, best: null, lastAt: null };
+  }
+  function getQuiz(id) { return quizzes.find(function (q) { return q.id === id; }); }
+  function editQuiz() { return getQuiz(ui.editId); }
+
+  var SAMPLE = {
+    title: 'Buyer behavior (sample)',
+    questions: [
+      { type: 'choice', text: 'What are "buying criteria"?', options: ['The specific attributes a customer seeks in a product, formed from motives and constraints', 'A company\'s internal list of approved vendors', 'The price points a retailer sets for each segment', 'Legal requirements a product must meet before sale'], correct: 0, explain: 'People talk in criteria ("a 5-star crash rating"). Asking "Why do you want that?" reveals the motive behind them, which is called value laddering.' },
+      { type: 'tf', text: 'Most buyers are optimizers: they compare every brand to find the best one.', tf: false, explain: 'Most buyers satisfice. They settle for "good enough" because trying new brands is risky, shopping takes effort, and cognitive capacity is limited.' },
+      { type: 'short', text: 'What is the term for the conflicting positive and negative feelings a buyer has after a large purchase?', answers: ['post-purchase dissonance', 'cognitive dissonance', 'dissonance'], explain: 'Reassurance at the point of sale helps bolster the positive feelings.' },
+      { type: 'choice', text: 'Buyers spend little time shopping and often do little brand comparison. Which type of good is this?', options: ['Shopping goods', 'Convenience goods', 'Specialty goods', 'Capital goods'], correct: 1, explain: 'Convenience goods depend mainly on advertising and distribution.' },
+      { type: 'choice', text: 'As a market matures, strategic focus shifts from market size to what?', options: ['Market share', 'Product variety', 'Exclusive distribution', 'Trial pricing'], correct: 0, explain: 'Companies compete for a static group of repeat buyers, so competition gets fiercer.' },
+      { type: 'tf', text: 'When buyer and user each have veto power and only one can be targeted, it is usually better to target the user.', tf: true, explain: 'The user has the fundamental motivation, so will work harder to persuade the buyer.' },
+      { type: 'short', text: 'In which stage of the product life cycle are most buyers first-time buyers?', answers: ['introduction', 'introductory', 'introduction stage'], explain: 'First-time buyers lack knowledge, so they need more information and often buy from high-service outlets.' },
+      { type: 'choice', text: 'Which two factors most influence how fast a new product is adopted?', options: ['Discontinuity of the product and the cost of trial', 'Brand name and package size', 'Number of distributors and advertising budget', 'Price and product color'], correct: 0, explain: 'The microwave was highly discontinuous and costly, so its introduction took roughly 20 years. Laundry pods took months.' }
+    ]
+  };
+
+  /* ---------- persistence ---------- */
+  function writeLocal() { try { localStorage.setItem(LS, JSON.stringify(quizzes)); } catch (e) {} }
+  function readLocal() {
+    try {
+      var a = JSON.parse(localStorage.getItem(LS) || '[]');
+      return Array.isArray(a) ? a.map(function (x) { return cleanQuiz(x, true); }).filter(Boolean) : [];
+    } catch (e) { return []; }
+  }
+  function strip(q) { var c = JSON.parse(JSON.stringify(q)); delete c.unsynced; return c; }
+
+  function setStatus(kind, err) {
+    if (kind) store.status = kind;
+    if (err !== undefined) store.err = err;
+    var m = {
+      saving: 'Saving…',
+      cloud: 'Saved to your account',
+      local: 'Saved in this browser only. Use Export to keep a backup copy.',
+      error: store.err || 'Could not save to your account. Changes are kept in this browser.'
+    };
+    $('#foot').textContent = m[store.status] || '';
+  }
+
+  function persist(id, now) {
+    setStatus('saving');
+    clearTimeout(timers.get(id));
+    timers.set(id, setTimeout(function () { flush(id); }, now ? 0 : 500));
+  }
+  function flush(id) {
+    clearTimeout(timers.get(id));
+    timers.delete(id);
+    var q = getQuiz(id);
+    if (!store.col) {
+      if (q) q.unsynced = true;
+      writeLocal();
+      setStatus('local');
+      return;
+    }
+    if (q) q.unsynced = false;
+    writeLocal();
+    var prev = chains.get(id) || Promise.resolve();
+    var next = prev.then(function () {
+      var cur = getQuiz(id);
+      if (!cur) return null;
+      return store.col.doc(id).set(strip(cur));
+    }).then(function () { setStatus('cloud'); }).catch(function (e) {
+      var q2 = getQuiz(id); if (q2) { q2.unsynced = true; writeLocal(); }
+      setStatus('error', e && e.code === 'quota_exceeded' ? 'Your account storage for this page is full. Changes are kept in this browser.' : '');
+    });
+    chains.set(id, next);
+  }
+  function removeQuiz(id) {
+    clearTimeout(timers.get(id)); timers.delete(id);
+    deleted.add(id);
+    quizzes = quizzes.filter(function (q) { return q.id !== id; });
+    writeLocal();
+    if (store.col) {
+      var prev = chains.get(id) || Promise.resolve();
+      chains.set(id, prev.then(function () { return store.col.doc(id).delete(); }).then(function () { setStatus('cloud'); }).catch(function () { setStatus('error'); }));
+    }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') Array.from(timers.keys()).forEach(flush);
+  });
+
+  function mergeRemote(remote) {
+    var local = new Map(quizzes.map(function (q) { return [q.id, q]; }));
+    var out = [], push = [];
+    remote.forEach(function (r) {
+      if (deleted.has(r.id)) { store.col.doc(r.id).delete().catch(function () {}); return; }
+      var l = local.get(r.id);
+      if (l && (l.updatedAt || 0) > (r.updatedAt || 0)) { out.push(l); push.push(l.id); }
+      else out.push(r);
+      local.delete(r.id);
+    });
+    local.forEach(function (l) { if (l.unsynced) { out.push(l); push.push(l.id); } });
+    quizzes = out;
+    writeLocal();
+    push.forEach(function (id) { persist(id, true); });
+  }
+
+  async function initStore() {
+    var c = window.claude;
+    if (!c || !c.use) { render(); return; }
+    c.use('downloads').then(function (x) { dl = x; }).catch(function () {});
+    try {
+      var res = await Promise.all([c.use('db'), c.use('user')]);
+      var db = res[0], user = res[1];
+      var uid = user ? await user.id() : null;
+      if (!db || !uid) { setStatus('local'); return; }
+      store.col = db.collection('data/users/' + uid);
+      var snap = await store.col.get();
+      var remote = snap.docs.map(function (d) { var x = d.data() || {}; x.id = d.id; return cleanQuiz(x, true); }).filter(Boolean);
+      mergeRemote(remote);
+      setStatus('cloud');
+      if (ui.view === 'library') render();
+    } catch (e) {
+      store.col = null;
+      setStatus('local');
+    }
+  }
+
+  /* ---------- toast + modal ---------- */
+  var toastT;
+  function toast(msg, label, fn) {
+    var t = $('#toast');
+    t.textContent = '';
+    var s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+    if (label) {
+      var b = document.createElement('button'); b.className = 'toast-btn'; b.textContent = label;
+      b.onclick = function () { fn(); t.hidden = true; };
+      t.appendChild(b);
+    }
+    t.hidden = false;
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { t.hidden = true; }, label ? 7000 : 3500);
+  }
+  function openModal(title, html) {
+    lastFocus = document.activeElement;
+    $('#mtitle').textContent = title;
+    $('#mbody').innerHTML = html;
+    $('#modal').hidden = false;
+    var f = $('#mbody textarea:not([readonly]), #mbody select, #mbody button');
+    if (f) f.focus();
+  }
+  function closeModal() {
+    $('#modal').hidden = true;
+    $('#mbody').innerHTML = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+
+  /* ---------- views ---------- */
+  function libraryHTML() {
+    if (!quizzes.length) {
+      return '<section class="card empty">' +
+        '<h1>Make your first quiz</h1>' +
+        '<p class="dim">Write your own questions and answers, then study them as a quiz or as flashcards. Everything saves as you type.</p>' +
+        '<div class="peek" aria-hidden="true"><p class="mono dim">Example question</p>' +
+        '<p class="qtext">Which type of good depends most on advertising and wide distribution?</p>' +
+        '<div class="pk"><span class="letter">A</span>Specialty goods</div>' +
+        '<div class="pk on"><span class="letter">B</span>Convenience goods</div>' +
+        '<div class="pk"><span class="letter">C</span>Shopping goods</div></div>' +
+        '<div class="row"><button class="btn primary" data-act="new">Create a quiz</button><button class="btn" data-act="sample">Add a sample quiz</button></div>' +
+        '<p class="dim small">The sample has 8 questions on buyer behavior: motives, satisficing, goods types and the product life cycle.</p>' +
+        '</section>';
+    }
+    var rows = quizzes.slice().sort(function (a, b) { return (b.updatedAt || 0) - (a.updatedAt || 0); });
+    return '<div class="page-head"><div><h1>Your quizzes</h1><p class="dim">Pick a quiz to study, or build a new one.</p></div>' +
+      '<button class="btn primary" data-act="new">New quiz</button></div>' +
+      '<div class="toolbar"><label class="chk"><input type="checkbox" id="shuffle"' + (ui.shuffle ? ' checked' : '') + '> Shuffle questions and answer order</label></div>' +
+      '<ul class="qz-list">' + rows.map(quizCardHTML).join('') + '</ul>';
+  }
+  function quizCardHTML(q) {
+    var ok = q.questions.filter(valid).length, total = q.questions.length;
+    var meta = [total + ' question' + (total === 1 ? '' : 's')];
+    if (total !== ok) meta.push((total - ok) + ' incomplete');
+    if (q.best) meta.push('best ' + q.best.correct + '/' + q.best.total);
+    if (q.plays) meta.push('studied ' + q.plays + '×');
+    var d = ok ? '' : ' disabled';
+    return '<li class="card qz"><div class="qz-info"><h2>' + esc(q.title || 'Untitled quiz') + '</h2><p class="mono dim">' + esc(meta.join(' · ')) + '</p></div>' +
+      '<div class="qz-actions"><button class="btn primary" data-act="play" data-id="' + q.id + '"' + d + '>Quiz</button>' +
+      '<button class="btn" data-act="cards" data-id="' + q.id + '"' + d + '>Flashcards</button>' +
+      '<button class="btn" data-act="edit" data-id="' + q.id + '">Edit</button></div></li>';
+  }
+
+  function questionHTML(qu, i) {
+    var body = '';
+    if (qu.type === 'choice') {
+      body = '<fieldset><legend>Answer options (select the correct one)</legend><div class="opts-edit">' +
+        qu.options.map(function (o, k) {
+          return '<div class="opt"><input type="radio" name="c-' + qu.id + '" data-f="correct" value="' + k + '"' + (qu.correct === k ? ' checked' : '') + ' aria-label="Option ' + LETTERS[k] + ' is the correct answer">' +
+            '<input type="text" id="o-' + qu.id + '-' + k + '" data-f="opt" data-k="' + k + '" value="' + esc(o) + '" placeholder="Option ' + LETTERS[k] + '" aria-label="Option ' + LETTERS[k] + '">' +
+            '<button class="icon" data-act="del-opt" data-k="' + k + '" aria-label="Remove option ' + LETTERS[k] + '"' + (qu.options.length <= 2 ? ' disabled' : '') + '>−</button></div>';
+        }).join('') +
+        '</div><div style="margin-top:10px"><button class="btn small" data-act="add-opt"' + (qu.options.length >= 6 ? ' disabled' : '') + '>+ Add option</button></div></fieldset>';
+    } else if (qu.type === 'tf') {
+      body = '<fieldset><legend>Correct answer</legend><div class="tfrow">' +
+        '<label class="chk"><input type="radio" name="t-' + qu.id + '" data-f="tf" value="true"' + (qu.tf ? ' checked' : '') + '> True</label>' +
+        '<label class="chk"><input type="radio" name="t-' + qu.id + '" data-f="tf" value="false"' + (!qu.tf ? ' checked' : '') + '> False</label></div></fieldset>';
+    } else {
+      body = '<div><label for="a-' + qu.id + '">Accepted answers (one per line, the first is shown as the answer)</label>' +
+        '<textarea id="a-' + qu.id + '" data-f="answers" rows="2" placeholder="e.g. post-purchase dissonance">' + esc(qu.answers.join('\n')) + '</textarea></div>';
+    }
+    return '<article class="card qcard" data-i="' + i + '" id="qc-' + qu.id + '">' +
+      '<div class="qhead"><span class="mono">Question ' + (i + 1) + '</span><span class="tag warn"' + (valid(qu) ? ' hidden' : '') + '>Incomplete</span><span class="spacer"></span>' +
+      '<label class="sr" for="type-' + qu.id + '">Question type</label>' +
+      '<select id="type-' + qu.id + '" data-f="type">' +
+      ['choice', 'tf', 'short'].map(function (t) { return '<option value="' + t + '"' + (qu.type === t ? ' selected' : '') + '>' + TYPE_LABEL[t] + '</option>'; }).join('') + '</select>' +
+      '<button class="icon" data-act="up" aria-label="Move question up">↑</button>' +
+      '<button class="icon" data-act="down" aria-label="Move question down">↓</button>' +
+      '<button class="icon" data-act="dup" aria-label="Duplicate question" title="Duplicate">⧉</button>' +
+      '<button class="icon" data-act="del-q" aria-label="Delete question">✕</button></div>' +
+      '<div><label for="qt-' + qu.id + '">Question</label><textarea id="qt-' + qu.id + '" data-f="text" rows="2" placeholder="Type your question">' + esc(qu.text) + '</textarea></div>' +
+      body +
+      '<div><label for="ex-' + qu.id + '">Explanation (optional, shown after answering)</label><input type="text" id="ex-' + qu.id + '" data-f="explain" value="' + esc(qu.explain) + '" placeholder="Why is this the answer?"></div>' +
+      '</article>';
+  }
+  function listHTML(q) {
+    if (!q.questions.length) return '<div class="none dim">No questions yet. Add one below.</div>';
+    return q.questions.map(questionHTML).join('');
+  }
+  function editHTML(q) {
+    return '<div class="ed-top"><button class="link" data-act="back">← All quizzes</button></div>' +
+      '<label class="sr" for="quiz-title">Quiz title</label>' +
+      '<input type="text" id="quiz-title" class="title-input" maxlength="120" value="' + esc(q.title) + '" placeholder="Quiz title">' +
+      '<div id="qlist">' + listHTML(q) + '</div>' +
+      '<div class="add-row"><button class="btn primary" data-act="add-q">+ Add question</button><button class="btn" data-act="toggle-bulk" aria-expanded="' + ui.bulkOpen + '">Bulk add</button></div>' +
+      '<div class="bulk card" id="bulk"' + (ui.bulkOpen ? '' : ' hidden') + '><div><label for="bulk-text">One question per line, as: question | answer</label>' +
+      '<textarea id="bulk-text" rows="6" placeholder="What does CLV stand for? | Customer lifetime value\nWhat is a satisficer? | A buyer who settles for good enough"></textarea></div>' +
+      '<div><button class="btn primary" data-act="bulk-add">Add as short-answer questions</button></div></div>' +
+      '<div class="zone"><button class="btn danger" data-act="del-quiz" id="del-quiz">Delete this quiz</button></div>';
+  }
+
+  function quizStage(it) {
+    var q = it.q;
+    var h = '<div class="card stage"><p class="mono dim">' + TYPE_LABEL[q.type] + '</p><h2 class="qtext">' + esc(q.text) + '</h2>';
+    if (q.type === 'choice') {
+      h += '<div class="opts" role="group" aria-label="Answer options">' + it.order.map(function (oi, pos) {
+        var cls = 'opt-btn', tag = '';
+        if (it.done) {
+          if (oi === q.correct) { cls += ' correct'; tag = '<span class="mono">Correct answer</span>'; }
+          else if (oi === it.picked) { cls += ' wrong'; tag = '<span class="mono">Your answer</span>'; }
+          else cls += ' muted';
+        }
+        return '<button class="' + cls + '" data-act="pick" data-oi="' + oi + '"' + (it.done ? ' disabled' : '') + '><span class="letter">' + LETTERS[pos] + '</span><span class="otext">' + esc(q.options[oi]) + '</span>' + tag + '</button>';
+      }).join('') + '</div>';
+    } else if (q.type === 'tf') {
+      h += '<div class="opts" role="group" aria-label="Answer options">' + ['true', 'false'].map(function (v, pos) {
+        var isRight = (v === 'true') === q.tf, cls = 'opt-btn', tag = '';
+        if (it.done) {
+          if (isRight) { cls += ' correct'; tag = '<span class="mono">Correct answer</span>'; }
+          else if (it.picked === v) { cls += ' wrong'; tag = '<span class="mono">Your answer</span>'; }
+          else cls += ' muted';
+        }
+        return '<button class="' + cls + '" data-act="pick-tf" data-v="' + v + '"' + (it.done ? ' disabled' : '') + '><span class="letter">' + (v === 'true' ? 'T' : 'F') + '</span><span class="otext">' + (v === 'true' ? 'True' : 'False') + '</span>' + tag + '</button>';
+      }).join('') + '</div>';
+    } else {
+      h += '<form id="short-form" class="short" autocomplete="off"><label class="sr" for="short-in">Your answer</label>' +
+        '<input type="text" id="short-in" value="' + esc(it.given) + '" placeholder="Type your answer"' + (it.done ? ' readonly class="' + (it.correct ? 'ok' : 'no') + '"' : '') + '>' +
+        (it.done ? '' : '<button class="btn primary" type="submit">Check</button><button class="btn" type="button" data-act="give-up">I don\'t know</button>') + '</form>';
+    }
+    if (it.done) {
+      var ans = answerText(q);
+      var more = q.type === 'short' && q.answers.length > 1 ? '<p class="small">Also accepted: ' + esc(q.answers.slice(1).join(', ')) + '</p>' : '';
+      h += '<div class="fb ' + (it.correct ? 'good' : 'bad') + '" role="status">' +
+        '<p><strong>' + (it.correct ? 'Correct.' : 'Not quite.') + '</strong>' + (it.correct && q.type !== 'short' ? '' : ' The answer is <span class="hl">' + esc(ans) + '</span>') + '</p>' + more +
+        (q.explain ? '<p class="expl">' + esc(q.explain) + '</p>' : '') + '</div>' +
+        '<div class="row">' + (!it.correct && q.type === 'short' ? '<button class="btn" data-act="override">Count as correct</button>' : '') +
+        '<button class="btn primary" id="next-btn" data-act="next">' + (ui.session.i < ui.session.items.length - 1 ? 'Next question' : 'See results') + '</button></div>';
+    }
+    return h + '</div>';
+  }
+  function flashHTML(s, it) {
+    var q = it.q, back, front;
+    back = '<p class="mono dim">Answer</p><p class="ans"><span class="hl">' + esc(answerText(q)) + '</span></p>' +
+      (q.type === 'short' && q.answers.length > 1 ? '<p class="dim">Also accepted: ' + esc(q.answers.slice(1).join(', ')) + '</p>' : '') +
+      (q.explain ? '<p class="expl">' + esc(q.explain) + '</p>' : '');
+    var opts = q.type === 'choice' ? '<ul class="plain">' + q.options.map(function (o, k) { return o.trim() ? '<li><span class="letter">' + LETTERS[k] + '</span><span>' + esc(o) + '</span></li>' : ''; }).join('') + '</ul>' : '';
+    front = '<p class="mono dim">' + TYPE_LABEL[q.type] + '</p><p class="qtext">' + esc(q.text) + '</p>' + opts;
+    return '<div class="fcard' + (s.flipped ? ' flipped' : '') + '" role="button" tabindex="0" data-act="flip" aria-label="' + (s.flipped ? 'Answer shown. Activate to see the question again' : 'Activate to show the answer') + '">' + (s.flipped ? back : front) + '</div>' +
+      '<div class="fc-actions">' + (s.flipped ? '<button class="btn" data-act="miss">Missed it</button><button class="btn primary" data-act="got">Got it</button>' : '<button class="btn primary" data-act="flip">Show answer</button>') + '</div>';
+  }
+  function playHTML() {
+    var s = ui.session, n = s.items.length, it = s.items[s.i];
+    var done = s.items.filter(function (x) { return x.done; }).length;
+    return '<div class="play-top"><button class="link" data-act="exit">← Exit</button><span class="mono">' + (s.i + 1) + ' / ' + n + '</span></div>' +
+      '<div class="bar" role="progressbar" aria-label="Progress" aria-valuemin="0" aria-valuemax="' + n + '" aria-valuenow="' + done + '"><span style="width:' + Math.round(done / n * 100) + '%"></span></div>' +
+      (s.mode === 'cards' ? flashHTML(s, it) : quizStage(it)) +
+      '<p class="hint mono dim">' + (s.mode === 'cards' ? 'Space flips · 1 missed · 2 got it' : '1–6 choose · Enter continues') + '</p>';
+  }
+  function resultsHTML() {
+    var s = ui.session, items = s.items, n = items.length;
+    var right = items.filter(function (i) { return i.correct; }).length;
+    var missed = items.filter(function (i) { return !i.correct; });
+    var pct = Math.round(right / n * 100);
+    var cards = s.mode === 'cards';
+    return '<div class="res"><h1>' + (cards ? 'Deck complete' : 'Round complete') + '</h1>' +
+      '<p class="score"><span class="hl">' + right + ' / ' + n + '</span></p>' +
+      '<p class="dim">' + pct + '% ' + (cards ? 'marked as known' : 'correct') + (s.newBest ? ' · New best score' : '') + '</p>' +
+      '<div class="row">' + (missed.length ? '<button class="btn primary" data-act="retry">Retry the ' + missed.length + ' missed</button>' : '') +
+      '<button class="btn' + (missed.length ? '' : ' primary') + '" data-act="again">Go again</button><button class="btn" data-act="exit">Back to quizzes</button></div></div>' +
+      '<h2 style="margin-bottom:12px">Review</h2><ol class="review">' + items.map(function (it) {
+        var q = it.q;
+        var yours = !it.correct && q.type === 'short' && it.given ? '<p class="small dim">Your answer: ' + esc(it.given) + '</p>' : '';
+        return '<li class="rv"><span class="tag ' + (it.correct ? 'ok' : 'miss') + '">' + (it.correct ? 'Correct' : 'Missed') + '</span><p>' + esc(q.text) + '</p>' +
+          (it.correct ? '' : '<p class="small">Answer: <span class="hl">' + esc(answerText(q)) + '</span></p>') + yours + '</li>';
+      }).join('') + '</ol>';
+  }
+
+  function render() {
+    var v = $('#view');
+    if (ui.view === 'library') v.innerHTML = libraryHTML();
+    else if (ui.view === 'edit') { var q = editQuiz(); if (!q) { ui.view = 'library'; v.innerHTML = libraryHTML(); } else v.innerHTML = editHTML(q); }
+    else if (ui.view === 'play') {
+      v.innerHTML = playHTML();
+      var s = ui.session, it = s.items[s.i];
+      if (s.mode === 'quiz') {
+        if (it.done) { var nb = $('#next-btn'); if (nb) nb.focus(); }
+        else if (it.q.type === 'short') { var si = $('#short-in'); if (si) si.focus(); }
+      } else if (s.flipped) { var fc = $('.fcard'); if (fc) fc.focus(); }
+    }
+    else if (ui.view === 'results') v.innerHTML = resultsHTML();
+    setStatus();
+  }
+  function go(view) { ui.view = view; render(); window.scrollTo(0, 0); }
+
+  /* ---------- study flow ---------- */
+  function startSession(quiz, mode, onlyIds) {
+    var qs = quiz.questions.filter(valid);
+    if (onlyIds) qs = qs.filter(function (q) { return onlyIds.indexOf(q.id) >= 0; });
+    if (!qs.length) { toast('Add at least one complete question first.'); return; }
+    if (ui.shuffle) qs = shuffled(qs);
+    ui.session = {
+      quizId: quiz.id, mode: mode, i: 0, flipped: false, full: !onlyIds, newBest: false,
+      items: qs.map(function (q) {
+        var idx = q.options.map(function (_, i) { return i; }).filter(function (i) { return (q.options[i] || '').trim(); });
+        return { q: q, order: ui.shuffle ? shuffled(idx) : idx, picked: null, given: '', done: false, correct: null };
+      })
+    };
+    go('play');
+  }
+  function cur() { var s = ui.session; return s.items[s.i]; }
+  function answer(ok, extra) {
+    var it = cur(); if (it.done) return;
+    it.done = true; it.correct = ok;
+    Object.keys(extra || {}).forEach(function (k) { it[k] = extra[k]; });
+    render();
+  }
+  function nextItem() {
+    var s = ui.session;
+    if (s.i < s.items.length - 1) { s.i++; s.flipped = false; render(); window.scrollTo(0, 0); }
+    else finish();
+  }
+  function mark(ok) { var it = cur(); it.done = true; it.correct = ok; nextItem(); }
+  function finish() {
+    var s = ui.session, quiz = getQuiz(s.quizId), total = s.items.length;
+    var right = s.items.filter(function (i) { return i.correct; }).length;
+    if (quiz) {
+      quiz.plays = (quiz.plays || 0) + 1;
+      quiz.lastAt = Date.now();
+      if (s.mode === 'quiz' && s.full) {
+        var prev = quiz.best;
+        if (!prev || right / total > prev.correct / prev.total) { quiz.best = { correct: right, total: total }; s.newBest = !!prev; }
+      }
+      persist(quiz.id, true);
+    }
+    go('results');
+  }
+
+  /* ---------- import / export ---------- */
+  function exportJSON(which) {
+    var list = which === 'all' ? quizzes : quizzes.filter(function (q) { return q.id === which; });
+    return JSON.stringify({ app: 'quizmark', version: 1, exported: new Date().toISOString(), quizzes: list.map(strip) }, null, 2);
+  }
+  function fillExport() {
+    var pick = $('#export-pick'), ta = $('#export-text');
+    if (pick && ta) ta.value = exportJSON(pick.value);
+  }
+  function exportNote(m) { var n = $('#export-note'); if (n) n.textContent = m; }
+  function importNote(m) { var n = $('#import-note'); if (n) n.textContent = m; }
+  function doImport() {
+    var ta = $('#import-text'); if (!ta) return;
+    var data;
+    try { data = JSON.parse(ta.value); } catch (e) { importNote('That is not valid JSON. Paste the exported text exactly as it was copied.'); return; }
+    var list = Array.isArray(data) ? data : (data && Array.isArray(data.quizzes) ? data.quizzes : (data && (data.questions || data.cards) ? [data] : []));
+    var made = list.map(function (r) { return cleanQuiz(r, false); }).filter(function (q) { return q && q.questions.length; });
+    if (!made.length) { importNote('No quizzes with questions were found in that text.'); return; }
+    made.forEach(function (q) { if (!q.title) q.title = 'Imported quiz'; quizzes.push(q); persist(q.id, true); });
+    closeModal();
+    ui.view = 'library';
+    render();
+    toast('Imported ' + made.length + (made.length === 1 ? ' quiz' : ' quizzes') + '.');
+  }
+
+  /* ---------- editor helpers ---------- */
+  function touch(q) { q.updatedAt = Date.now(); persist(q.id); }
+  function refreshWarn(card, qu) { var w = card.querySelector('.warn'); if (w) w.hidden = valid(qu); }
+  function rerenderList(focusSel) {
+    var q = editQuiz(); if (!q) return;
+    $('#qlist').innerHTML = listHTML(q);
+    if (focusSel) { var f = $(focusSel); if (f && !f.disabled) f.focus(); }
+  }
+  function convertType(qu, t) {
+    var prev = qu.type;
+    if (t === 'short' && !qu.answers.length && prev === 'choice') { var c = (qu.options[qu.correct] || '').trim(); if (c) qu.answers = [c]; }
+    if (t === 'choice') {
+      while (qu.options.length < 4) qu.options.push('');
+      if (prev === 'short' && qu.answers[0] && !qu.options.some(function (o) { return o.trim(); })) { qu.options[0] = qu.answers[0]; qu.correct = 0; }
+    }
+    qu.type = t;
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function (e) {
+    if (e.target.id === 'modal') { closeModal(); return; }
+    var b = e.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    var act = b.dataset.act, id = b.dataset.id, q, card, i, qu;
+
+    switch (act) {
+      case 'new':
+        q = newQuiz(''); quizzes.push(q); persist(q.id, true);
+        ui.editId = q.id; ui.bulkOpen = false; go('edit');
+        $('#quiz-title').focus();
+        break;
+      case 'sample':
+        q = cleanQuiz(SAMPLE, false); quizzes.push(q); persist(q.id, true); render();
+        toast('Sample quiz added.');
+        break;
+      case 'play': case 'cards':
+        q = getQuiz(id); if (q) startSession(q, act === 'play' ? 'quiz' : 'cards');
+        break;
+      case 'edit':
+        ui.editId = id; ui.bulkOpen = false; go('edit');
+        break;
+      case 'back':
+        q = editQuiz(); if (q) { if (!q.title.trim()) { q.title = 'Untitled quiz'; } persist(q.id, true); }
+        go('library');
+        break;
+      case 'add-q':
+        q = editQuiz(); qu = newQuestion(); q.questions.push(qu); touch(q);
+        rerenderList('#qt-' + qu.id);
+        var nc = $('#qc-' + qu.id); if (nc && nc.scrollIntoView) nc.scrollIntoView({ block: 'center' });
+        break;
+      case 'del-q':
+        card = b.closest('.qcard'); i = +card.dataset.i; q = editQuiz();
+        qu = q.questions.splice(i, 1)[0]; touch(q); rerenderList();
+        toast('Question deleted.', 'Undo', function () { var qq = editQuiz(); if (!qq) return; qq.questions.splice(Math.min(i, qq.questions.length), 0, qu); touch(qq); rerenderList(); });
+        break;
+      case 'up': case 'down':
+        card = b.closest('.qcard'); i = +card.dataset.i; q = editQuiz();
+        var j = act === 'up' ? i - 1 : i + 1;
+        if (j < 0 || j >= q.questions.length) break;
+        var tmp = q.questions[i]; q.questions[i] = q.questions[j]; q.questions[j] = tmp; touch(q);
+        rerenderList('#qc-' + tmp.id + ' [data-act="' + act + '"]');
+        break;
+      case 'dup':
+        card = b.closest('.qcard'); i = +card.dataset.i; q = editQuiz();
+        var copy = cleanQuestion(JSON.parse(JSON.stringify(q.questions[i])), false);
+        q.questions.splice(i + 1, 0, copy); touch(q); rerenderList('#qt-' + copy.id);
+        break;
+      case 'add-opt':
+        card = b.closest('.qcard'); q = editQuiz(); qu = q.questions[+card.dataset.i];
+        if (qu.options.length < 6) { qu.options.push(''); touch(q); card.outerHTML = questionHTML(qu, +card.dataset.i); var no = $('#o-' + qu.id + '-' + (qu.options.length - 1)); if (no) no.focus(); }
+        break;
+      case 'del-opt':
+        card = b.closest('.qcard'); i = +card.dataset.i; q = editQuiz(); qu = q.questions[i];
+        var k = +b.dataset.k;
+        if (qu.options.length > 2) {
+          qu.options.splice(k, 1);
+          if (qu.correct === k) qu.correct = 0; else if (qu.correct > k) qu.correct--;
+          touch(q); card.outerHTML = questionHTML(qu, i);
+          var af = $('#o-' + qu.id + '-' + Math.min(k, qu.options.length - 1)); if (af) af.focus();
+        }
+        break;
+      case 'toggle-bulk':
+        ui.bulkOpen = !ui.bulkOpen; $('#bulk').hidden = !ui.bulkOpen; b.setAttribute('aria-expanded', String(ui.bulkOpen));
+        if (ui.bulkOpen) $('#bulk-text').focus();
+        break;
+      case 'bulk-add':
+        q = editQuiz();
+        var lines = $('#bulk-text').value.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+        var added = 0;
+        lines.forEach(function (l) {
+          var p = l.indexOf('|'); if (p < 0) p = l.indexOf('\t');
+          if (p < 0) return;
+          var qt = l.slice(0, p).trim(), an = l.slice(p + 1).trim();
+          if (!qt || !an) return;
+          var nq = newQuestion('short'); nq.text = qt.slice(0, 2000); nq.answers = [an.slice(0, 2000)];
+          q.questions.push(nq); added++;
+        });
+        if (!added) { toast('No lines in the form question | answer were found.'); break; }
+        touch(q); $('#bulk-text').value = ''; ui.bulkOpen = false; $('#bulk').hidden = true;
+        b.closest('.bulk').previousElementSibling.querySelector('[data-act="toggle-bulk"]').setAttribute('aria-expanded', 'false');
+        rerenderList();
+        toast('Added ' + added + ' question' + (added === 1 ? '' : 's') + '.');
+        break;
+      case 'del-quiz':
+        if (b.dataset.armed) {
+          removeQuiz(ui.editId); ui.editId = null; go('library'); toast('Quiz deleted.');
+        } else {
+          b.dataset.armed = '1'; b.textContent = 'Click again to delete for good';
+          setTimeout(function () { if (b.isConnected) { delete b.dataset.armed; b.textContent = 'Delete this quiz'; } }, 4000);
+        }
+        break;
+
+      /* study */
+      case 'pick': {
+        var it = cur(), oi = +b.dataset.oi;
+        answer(oi === it.q.correct, { picked: oi });
+        break;
+      }
+      case 'pick-tf': {
+        var it2 = cur();
+        answer((b.dataset.v === 'true') === it2.q.tf, { picked: b.dataset.v });
+        break;
+      }
+      case 'give-up': answer(false, { given: '' }); break;
+      case 'override': cur().correct = true; render(); break;
+      case 'next': nextItem(); break;
+      case 'flip': ui.session.flipped = !ui.session.flipped; render(); break;
+      case 'got': mark(true); break;
+      case 'miss': mark(false); break;
+      case 'exit': ui.session = null; go('library'); break;
+      case 'again': q = getQuiz(ui.session.quizId); if (q) startSession(q, ui.session.mode); break;
+      case 'retry':
+        q = getQuiz(ui.session.quizId);
+        var ids = ui.session.items.filter(function (x) { return !x.correct; }).map(function (x) { return x.q.id; });
+        if (q) startSession(q, ui.session.mode, ids);
+        break;
+
+      /* modals */
+      case 'close-modal': closeModal(); break;
+      case 'open-export':
+        openModal('Export quizzes',
+          '<div style="display:grid;gap:12px"><div><label for="export-pick">What to export</label><select id="export-pick"><option value="all">All quizzes (' + quizzes.length + ')</option>' +
+          quizzes.map(function (x) { return '<option value="' + x.id + '">' + esc(x.title || 'Untitled quiz') + '</option>'; }).join('') + '</select></div>' +
+          '<div><label for="export-text">Quiz data</label><textarea id="export-text" readonly rows="10"></textarea></div>' +
+          '<div class="row"><button class="btn primary" data-act="copy">Copy</button>' + (dl ? '<button class="btn" data-act="save-file">Save as file</button>' : '') + '</div>' +
+          '<p class="dim small" id="export-note">Paste this into Import later, or on another device, to restore your quizzes.</p></div>');
+        fillExport();
+        break;
+      case 'copy': {
+        var ta = $('#export-text');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ta.value).then(function () { exportNote('Copied to the clipboard.'); }, function () { ta.focus(); ta.select(); exportNote('Text selected. Press Ctrl+C (Cmd+C on Mac) to copy.'); });
+        } else { ta.focus(); ta.select(); exportNote('Text selected. Press Ctrl+C (Cmd+C on Mac) to copy.'); }
+        break;
+      }
+      case 'save-file':
+        if (dl) {
+          var pk = $('#export-pick').value;
+          var pq = pk === 'all' ? null : getQuiz(pk);
+          var name = (pq ? pq.title : 'all-quizzes').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 60) || 'quiz';
+          dl.save({ filename: 'quizmark-' + name + '.json', data: $('#export-text').value }).then(function () { exportNote('File saved.'); }, function (err) {
+            if (err && err.code !== 'declined') exportNote('Saving a file is not available here. Use Copy instead.');
+          });
+        }
+        break;
+      case 'open-import':
+        openModal('Import quizzes',
+          '<div style="display:grid;gap:12px"><div><label for="import-text">Paste quiz data</label><textarea id="import-text" rows="8" placeholder=\'{"title":"My quiz","questions":[{"question":"Capital of France?","answer":"Paris"}]}\'></textarea></div>' +
+          '<div><label for="import-file">Or choose a .json file</label><input type="file" id="import-file" accept=".json,.txt,application/json"></div>' +
+          '<div class="row"><button class="btn primary" data-act="do-import">Import</button></div>' +
+          '<p class="dim small" id="import-note">Accepts Quizmark exports, or a simple list of questions with answers like the example above.</p></div>');
+        break;
+      case 'do-import': doImport(); break;
+    }
+  });
+
+  document.addEventListener('input', function (e) {
+    var el = e.target;
+    if (el.id === 'quiz-title') { var q0 = editQuiz(); if (q0) { q0.title = el.value; touch(q0); } return; }
+    if (!el.dataset || !el.dataset.f) return;
+    var card = el.closest('.qcard'); if (!card) return;
+    var q = editQuiz(); if (!q) return;
+    var qu = q.questions[+card.dataset.i]; if (!qu) return;
+    var f = el.dataset.f;
+    if (f === 'text') qu.text = el.value;
+    else if (f === 'explain') qu.explain = el.value;
+    else if (f === 'opt') qu.options[+el.dataset.k] = el.value;
+    else if (f === 'correct') qu.correct = +el.value;
+    else if (f === 'tf') qu.tf = el.value === 'true';
+    else if (f === 'answers') qu.answers = el.value.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    else return;
+    touch(q); refreshWarn(card, qu);
+  });
+
+  document.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.id === 'shuffle') { ui.shuffle = el.checked; try { localStorage.setItem('quizmark.shuffle', el.checked ? '1' : '0'); } catch (x) {} return; }
+    if (el.id === 'export-pick') { fillExport(); return; }
+    if (el.id === 'import-file' && el.files && el.files[0]) {
+      var fr = new FileReader();
+      fr.onload = function () { var t = $('#import-text'); if (t) t.value = String(fr.result || ''); importNote('File loaded. Press Import to add its quizzes.'); };
+      fr.onerror = function () { importNote('Could not read that file.'); };
+      fr.readAsText(el.files[0]);
+      return;
+    }
+    if (el.dataset && el.dataset.f === 'type') {
+      var card = el.closest('.qcard'), q = editQuiz(); if (!card || !q) return;
+      var i = +card.dataset.i, qu = q.questions[i];
+      convertType(qu, el.value); touch(q);
+      card.outerHTML = questionHTML(qu, i);
+      var sel = $('#type-' + qu.id); if (sel) sel.focus();
+    }
+  });
+
+  document.addEventListener('submit', function (e) {
+    if (e.target.id !== 'short-form') return;
+    e.preventDefault();
+    var it = cur(); if (it.done) return;
+    var v = $('#short-in').value;
+    if (!v.trim()) return;
+    answer(matches(it.q, v), { given: v });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !$('#modal').hidden) { closeModal(); return; }
+    if (ui.view !== 'play' || !ui.session || e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target, s = ui.session, it = cur();
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+    if (s.mode === 'cards') {
+      if ((e.key === ' ' || e.key === 'Enter') && (t === document.body || t.classList.contains('fcard'))) { e.preventDefault(); s.flipped = !s.flipped; render(); return; }
+      if (s.flipped && e.key === '1') mark(false);
+      else if (s.flipped && e.key === '2') mark(true);
+      return;
+    }
+    if (it.done) {
+      if (e.key === 'Enter' && t === document.body) { e.preventDefault(); nextItem(); }
+      return;
+    }
+    if (/^[1-6]$/.test(e.key)) {
+      var pos = +e.key - 1;
+      if (it.q.type === 'choice' && pos < it.order.length) answer(it.order[pos] === it.q.correct, { picked: it.order[pos] });
+      else if (it.q.type === 'tf' && pos < 2) { var v = pos === 0 ? 'true' : 'false'; answer((v === 'true') === it.q.tf, { picked: v }); }
+    }
+  });
+
+  /* ---------- boot ---------- */
+  quizzes = readLocal();
+  render();
+  initStore();
+})();
+</script>
+
+</body>
+</html>
