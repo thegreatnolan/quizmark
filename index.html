@@ -12,7 +12,7 @@ img{max-width:100%}
 <title>Quizmark</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500;700&display=swap">
 <style>
 /* Layout: one centered column (54rem). Library, editor and study screens swap in place inside #view.
    Highlighter yellow is the only accent; ink navy carries primary actions. */
@@ -69,7 +69,7 @@ h2 { font-size: 1.2rem; line-height: 1.25; font-weight: 600; }
 .small { font-size: .88rem; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-.hl { background: var(--mark); color: var(--mark-ink); padding: 0 .22em; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.hl { background: #2FA565; color: var(--mark-ink); padding: 0 .22em; border-radius: 3px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 
 /* header */
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 22px; }
@@ -77,7 +77,7 @@ h2 { font-size: 1.2rem; line-height: 1.25; font-weight: 600; }
 .top-actions { display: flex; gap: 8px; }
 
 /* buttons */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 2.6rem; padding: .45rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 700 .95rem var(--f-body); cursor: pointer; text-align: center; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 2.6rem; padding: .45rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); font: 600 .95rem var(--f-body); cursor: pointer; transition: border-color .15s ease, background-color .15s ease, color .15s ease, transform .15s ease; }
 .btn:hover { border-color: var(--ink-2); }
 .btn.primary { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
 .btn.danger { color: var(--bad); }
@@ -141,7 +141,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 .stage { display: grid; gap: 16px; padding: clamp(18px, 4vw, 28px); }
 .qtext { font-size: clamp(1.3rem, 3.6vw, 1.7rem); line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
 .opts { display: grid; gap: 10px; }
-.opt-btn { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: 400 1.02rem/1.35 var(--f-body); text-align: left; cursor: pointer; }
+.opt-btn { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: .75rem .85rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
 .opt-btn:hover:not(:disabled) { border-color: var(--ink-2); background: var(--surface-2); }
 .opt-btn:disabled { cursor: default; color: var(--ink); }
 .opt-btn .otext { overflow-wrap: anywhere; }
@@ -164,6 +164,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 @media (hover: hover) and (pointer: fine) { .hint { display: block; } }
 
 .fcard { display: grid; gap: 12px; align-content: center; min-height: 15rem; padding: clamp(18px, 4vw, 30px); border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow); cursor: pointer; }
+.fcard:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 .fcard:hover { border-color: var(--ink-2); }
 .fcard.flipped { background: var(--surface-2); }
 .fcard .ans { font-family: var(--f-display); font-size: clamp(1.4rem, 4vw, 1.9rem); font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
@@ -184,10 +185,10 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
 
 /* modal + toast + footer */
 .modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px)); background: var(--scrim); }
-.sheet { width: 100%; max-width: 40rem; max-height: 100%; overflow: auto; display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.sheet { width: 100%; max-width: 40rem; max-height: 100%; overflow: auto; display: grid; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .sheet textarea { font: 400 .85rem/1.45 var(--f-mono); }
-#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; display: flex; gap: 14px; align-items: center; max-width: calc(100vw - 32px); padding: .7rem 1rem; border-radius: 10px; background: var(--btn-bg); color: var(--btn-fg); box-shadow: 0 8px 24px rgba(0,0,0,.25); font-weight: 700; font-size: .95rem; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 30; display: flex; gap: 14px; align-items: center; max-width: calc(100vw - 32px); padding: 12px 16px; background: var(--ink); color: var(--surface); border-radius: 10px; box-shadow: var(--shadow); }
 .toast-btn { background: none; border: 0; color: inherit; font: 700 .95rem var(--f-body); text-decoration: underline; cursor: pointer; padding: 0; }
 .foot { margin-top: 32px; text-align: center; }
 </style>
@@ -322,14 +323,14 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
   var SAMPLE = {
     title: 'Buyer behavior (sample)',
     questions: [
-      { type: 'choice', text: 'What are "buying criteria"?', options: ['The specific attributes a customer seeks in a product, formed from motives and constraints', 'A company\'s internal list of approved vendors', 'The price points a retailer sets for each segment', 'Legal requirements a product must meet before sale'], correct: 0, explain: 'People talk in criteria ("a 5-star crash rating"). Asking "Why do you want that?" reveals the motive behind them, which is called value laddering.' },
-      { type: 'tf', text: 'Most buyers are optimizers: they compare every brand to find the best one.', tf: false, explain: 'Most buyers satisfice. They settle for "good enough" because trying new brands is risky, shopping takes effort, and cognitive capacity is limited.' },
-      { type: 'short', text: 'What is the term for the conflicting positive and negative feelings a buyer has after a large purchase?', answers: ['post-purchase dissonance', 'cognitive dissonance', 'dissonance'], explain: 'Reassurance at the point of sale helps bolster the positive feelings.' },
-      { type: 'choice', text: 'Buyers spend little time shopping and often do little brand comparison. Which type of good is this?', options: ['Shopping goods', 'Convenience goods', 'Specialty goods', 'Capital goods'], correct: 1, explain: 'Convenience goods depend mainly on advertising and distribution.' },
-      { type: 'choice', text: 'As a market matures, strategic focus shifts from market size to what?', options: ['Market share', 'Product variety', 'Exclusive distribution', 'Trial pricing'], correct: 0, explain: 'Companies compete for a static group of repeat buyers, so competition gets fiercer.' },
-      { type: 'tf', text: 'When buyer and user each have veto power and only one can be targeted, it is usually better to target the user.', tf: true, explain: 'The user has the fundamental motivation, so will work harder to persuade the buyer.' },
-      { type: 'short', text: 'In which stage of the product life cycle are most buyers first-time buyers?', answers: ['introduction', 'introductory', 'introduction stage'], explain: 'First-time buyers lack knowledge, so they need more information and often buy from high-service outlets.' },
-      { type: 'choice', text: 'Which two factors most influence how fast a new product is adopted?', options: ['Discontinuity of the product and the cost of trial', 'Brand name and package size', 'Number of distributors and advertising budget', 'Price and product color'], correct: 0, explain: 'The microwave was highly discontinuous and costly, so its introduction took roughly 20 years. Laundry pods took months.' }
+      { type: 'choice', text: 'What are "buying criteria"?', options: ['The specific attributes a customer seeks in a product, formed from motives and constraints', 'A company\'s internal list of targets', 'A legal requirement for buying', 'A pricing model'], correct: 0, explain: 'Buying criteria are the attributes a customer looks for based on motives and constraints.' },
+      { type: 'tf', text: 'Most buyers are optimizers: they compare every brand to find the best one.', tf: false, explain: 'Most buyers satisfice. They settle for "good enough" because trying to compare everything is too costly.' },
+      { type: 'short', text: 'What is the term for the conflicting positive and negative feelings a buyer has after a large purchase?', answers: ['post-purchase dissonance', 'cognitive dissonance'], explain: 'Post-purchase dissonance is the discomfort after a purchase when doubts or regret set in.' },
+      { type: 'choice', text: 'Buyers spend little time shopping and often do little brand comparison. Which type of good is this?', options: ['Shopping goods', 'Convenience goods', 'Specialty goods', 'Industrial goods'], correct: 1, explain: 'Convenience goods are bought frequently and with little effort or comparison.' },
+      { type: 'choice', text: 'As a market matures, strategic focus shifts from market size to what?', options: ['Market share', 'Product variety', 'Exclusive distribution', 'Trial pricing'], correct: 0, explain: 'In a mature market, firms compete more fiercely for customer share than for new-market expansion.' },
+      { type: 'tf', text: 'When buyer and user each have veto power and only one can be targeted, it is usually better to target the user.', tf: true, explain: 'The user has the fundamental motivation and can block use, so they are often the better target.' },
+      { type: 'short', text: 'In which stage of the product life cycle are most buyers first-time buyers?', answers: ['introduction', 'introductory', 'introduction stage'], explain: 'First-time buyers are most common in the introduction stage, when a product is new.' },
+      { type: 'choice', text: 'Which two factors most influence how fast a new product is adopted?', options: ['Discontinuity of the product and the cost of trial', 'Brand name and package size', 'Price and distribution', 'Product quality and warranty'], correct: 0, explain: 'Adoption speed is shaped by how different the product is and how easy it is to try.' }
     ]
   };
 
@@ -502,9 +503,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
     if (qu.type === 'choice') {
       body = '<fieldset><legend>Answer options (select the correct one)</legend><div class="opts-edit">' +
         qu.options.map(function (o, k) {
-          return '<div class="opt"><input type="radio" name="c-' + qu.id + '" data-f="correct" value="' + k + '"' + (qu.correct === k ? ' checked' : '') + ' aria-label="Option ' + LETTERS[k] + ' is the correct answer">' +
-            '<input type="text" id="o-' + qu.id + '-' + k + '" data-f="opt" data-k="' + k + '" value="' + esc(o) + '" placeholder="Option ' + LETTERS[k] + '" aria-label="Option ' + LETTERS[k] + '">' +
-            '<button class="icon" data-act="del-opt" data-k="' + k + '" aria-label="Remove option ' + LETTERS[k] + '"' + (qu.options.length <= 2 ? ' disabled' : '') + '>−</button></div>';
+          return '<div class="opt"><input type="radio" name="c-' + qu.id + '" data-f="correct" value="' + k + '"' + (qu.correct === k ? ' checked' : '') + ' aria-label="Option ' + LETTERS[k] + '"><input type="text" id="o-' + qu.id + '-' + k + '" data-f="opt" data-k="' + k + '" value="' + esc(o) + '" placeholder="Option ' + LETTERS[k] + '" aria-label="Option ' + LETTERS[k] + '"><button class="icon" data-act="del-opt" data-k="' + k + '" aria-label="Remove option ' + LETTERS[k] + '"' + (qu.options.length <= 2 ? ' disabled' : '') + '>−</button></div>';
         }).join('') +
         '</div><div style="margin-top:10px"><button class="btn small" data-act="add-opt"' + (qu.options.length >= 6 ? ' disabled' : '') + '>+ Add option</button></div></fieldset>';
     } else if (qu.type === 'tf') {
@@ -526,7 +525,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
       '<button class="icon" data-act="del-q" aria-label="Delete question">✕</button></div>' +
       '<div><label for="qt-' + qu.id + '">Question</label><textarea id="qt-' + qu.id + '" data-f="text" rows="2" placeholder="Type your question">' + esc(qu.text) + '</textarea></div>' +
       body +
-      '<div><label for="ex-' + qu.id + '">Explanation (optional, shown after answering)</label><input type="text" id="ex-' + qu.id + '" data-f="explain" value="' + esc(qu.explain) + '" placeholder="Why is this the answer?"></div>' +
+      '<div><label for="ex-' + qu.id + '">Explanation (optional, shown after answering)</label><input type="text" id="ex-' + qu.id + '" data-f="explain" value="' + esc(qu.explain) + '" placeholder="Explain the answer" aria-label="Explanation"></div>' +
       '</article>';
   }
   function listHTML(q) {
@@ -591,8 +590,9 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
       (q.explain ? '<p class="expl">' + esc(q.explain) + '</p>' : '');
     var opts = q.type === 'choice' ? '<ul class="plain">' + q.options.map(function (o, k) { return o.trim() ? '<li><span class="letter">' + LETTERS[k] + '</span><span>' + esc(o) + '</span></li>' : ''; }).join('') + '</ul>' : '';
     front = '<p class="mono dim">' + TYPE_LABEL[q.type] + '</p><p class="qtext">' + esc(q.text) + '</p>' + opts;
-    return '<div class="fcard' + (s.flipped ? ' flipped' : '') + '" role="button" tabindex="0" data-act="flip" aria-label="' + (s.flipped ? 'Answer shown. Activate to see the question again' : 'Activate to show the answer') + '">' + (s.flipped ? back : front) + '</div>' +
-      '<div class="fc-actions">' + (s.flipped ? '<button class="btn" data-act="miss">Missed it</button><button class="btn primary" data-act="got">Got it</button>' : '<button class="btn primary" data-act="flip">Show answer</button>') + '</div>';
+    return '<div class="fcard' + (s.flipped ? ' flipped' : '') + '" role="button" tabindex="0" data-act="flip" aria-label="' + (s.flipped ? 'Answer shown. Activate to see the question again' : 'Question shown. Activate to see the answer') + '">' +
+      (s.flipped ? back : front) +
+      '<div class="fc-actions">' + (s.flipped ? '<button class="btn" data-act="miss">Missed it</button><button class="btn primary" data-act="got">Got it</button>' : '<button class="btn primary" data-act="flip">Reveal answer</button>') + '</div></div>';
   }
   function playHTML() {
     var s = ui.session, n = s.items.length, it = s.items[s.i];
@@ -873,7 +873,7 @@ fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
         break;
       case 'open-import':
         openModal('Import quizzes',
-          '<div style="display:grid;gap:12px"><div><label for="import-text">Paste quiz data</label><textarea id="import-text" rows="8" placeholder=\'{"title":"My quiz","questions":[{"question":"Capital of France?","answer":"Paris"}]}\'></textarea></div>' +
+          '<div style="display:grid;gap:12px"><div><label for="import-text">Paste quiz data</label><textarea id="import-text" rows="8" placeholder=\'{"title":"My quiz","questions":[{"question":"Can you be more specific?","answer":"Yes"}]}\'></textarea></div>' +
           '<div><label for="import-file">Or choose a .json file</label><input type="file" id="import-file" accept=".json,.txt,application/json"></div>' +
           '<div class="row"><button class="btn primary" data-act="do-import">Import</button></div>' +
           '<p class="dim small" id="import-note">Accepts Quizmark exports, or a simple list of questions with answers like the example above.</p></div>');
